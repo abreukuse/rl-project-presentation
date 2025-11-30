@@ -6,12 +6,29 @@ paginate: true
 
 # Abordagem Multiagente na combinação de ações de patrulhamento preventivo e de atendimento de chamadas policiais
 
-**Autores:** Moacir Almeida Simões Júnior, Tobias de Abreu Kuse
-**Afiliação:** Instituto de Informática, Universidade Federal do Rio Grande do Sul
+<!-- <style>
+img[alt~="right"] {
+  display: block;
+  margin: 0 auto;
+}
+</style>
+
+![w:500 right](images/fig2.png) -->
+![bg right:40%](images/fig5.png)
+
+Moacir Almeida Simões Júnior
+Tobias de Abreu Kuse
+<!-- Instituto de Informática, Universidade Federal do Rio Grande do Sul -->
 
 ---
 
 # Resumo do Projeto
+
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
 
 Este trabalho propõe e avalia um modelo de **Aprendizado por Reforço Multiagente (MARL)** para o patrulhamento policial urbano.
 
@@ -24,6 +41,12 @@ Este trabalho propõe e avalia um modelo de **Aprendizado por Reforço Multiagen
 
 # O Problema e os Objetivos
 
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
 ## O Desafio Central
 Equilibrar dois objetivos conflitantes da atividade policial:
 1.  **Patrulhamento Preventivo:** Maximizar a presença policial em áreas de alto risco (*hotspots*) para inibir crimes.
@@ -35,6 +58,12 @@ Um **sistema multiagente (MARL)** onde as patrulhas são agentes autônomos que 
 ---
 
 # Metodologia: Visão Geral
+
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
 
 ![bg right:40%](images/fig1.png)
 
@@ -49,7 +78,13 @@ Um **sistema multiagente (MARL)** onde as patrulhas são agentes autônomos que 
 
 # Metodologia: Dinâmica da Simulação
 
-![bg right:45%](images/QUADRO-ESTADOS-PT%20(1).png)
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
+<!-- ![bg right:45%](images/fig3.png) -->
 
 ## Simulação de Eventos Discretos
 - Desenvolvida em Python (`simpy`), modela a operação minuto a minuto.
@@ -57,16 +92,48 @@ Um **sistema multiagente (MARL)** onde as patrulhas são agentes autônomos que 
 - **Lógica do Despachante:** Regras fixas (mais próximo para P1, da própria área para P2/P3).
 - **O MARL atua** quando a patrulha está no estado `DISPONÍVEL`, decidindo para onde ir.
 
+
+---
+
+# Metodologia: Dinâmica da Simulação
+
+<style>
+section {
+  font-size: 25px;
+}
+img[alt~="center"] {
+  position: absolute;
+  top: 55%;  /* Ponto central vertical (55% para dar espaço ao título) */
+  left: 50%; /* Ponto central horizontal */
+  transform: translate(-50%, -50%); /* Puxa a imagem de volta pelo seu próprio centro */
+  
+  /* Limites para evitar corte */
+  max-height: 70%; 
+  max-width: 90%;
+  
+  object-fit: contain; /* Mantém a proporção sem distorcer */
+}
+</style>
+
+![center](images/fig3.png)
+
+
 ---
 
 # Metodologia: Modelo MARL
 
-## Formulação
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
+### Formulação
 - **MDP Cooperativo Multiagente:** $\mathcal{M} = \langle \mathcal{A}, \mathcal{S}, \mathcal{U}, P, R, \gamma \rangle$
 - **Agentes ($\mathcal{A}$):** As próprias patrulhas policiais.
 - **Espaço de Ação ($\mathcal{U}$):** O conjunto de *hotspots* (vértices do grafo) para onde o agente pode escolher se deslocar.
 
-## Aprendizado
+### Aprendizado
 - Cada agente aprende uma política $\pi(u_i|o_i)$ que mapeia sua observação local para uma ação.
 - O objetivo é maximizar uma **recompensa global compartilhada**, incentivando a cooperação.
 - Utilizamos o algoritmo **Dueling Deep Q-Network (Dueling DQN)**.
@@ -75,7 +142,13 @@ Um **sistema multiagente (MARL)** onde as patrulhas são agentes autônomos que 
 
 # Metodologia: A Observação do Agente ($o_i$)
 
-Cada agente recebe um vetor de 19 dimensões com informações locais e globais, agrupadas em:
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
+Cada agente recebe um vetor de 19 dimensões com informações locais e globais:
 
 - **Informações Temporais:**
   - Codificação cíclica do horário do dia e do dia da semana.
@@ -93,6 +166,12 @@ Cada agente recebe um vetor de 19 dimensões com informações locais e globais,
 
 # Metodologia: A Função de Recompensa ($r_t$)
 
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
 A recompensa é **global e compartilhada**, refletindo o desempenho do sistema como um todo.
 
 $r_t = \alpha \cdot \Delta \text{atendidos}_t - \lambda_{\text{idle}} \cdot \widetilde{\Delta \text{idle}_t} - \lambda_{\text{resp}} \cdot \widetilde{\Delta \text{resp}_t} - \lambda_{\text{back}} \cdot \widetilde{\Delta \text{backlog}_t}$
@@ -109,6 +188,12 @@ Os hiperparâmetros $\alpha$ e $\lambda$s controlam o *trade-off* entre os objet
 
 # Validação: Setup Experimental
 
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
 ## Estratégias Comparadas
 1.  **MARL_8:** A melhor configuração encontrada do nosso modelo após vários experimentos.
 2.  **BAPS:** Uma heurística forte (baseada em Otimização por Colônia de Formigas) usada como baseline de alto desempenho.
@@ -122,7 +207,13 @@ Os hiperparâmetros $\alpha$ e $\lambda$s controlam o *trade-off* entre os objet
 
 # Resultados: Comparação Geral
 
-## Métricas de Desempenho (Médias de 3 Execuções)
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
+<!-- ## Métricas de Desempenho (Médias de 3 Execuções) -->
 | Método    | Ociosidade Média | Fila Média | Deslocamento Médio | Tempo Resposta Médio |
 | :-------- | :--------------- | :--------- | :----------------- | :------------------- |
 | ALEATÓRIO | 4843.14          | 39.52      | 7.03               | 46.54                |
@@ -186,3 +277,8 @@ O agente MARL aprendeu uma política de patrulhamento mais sofisticada. Ele pare
 2.  **Funções de Recompensa Adaptativas:** Investigar recompensas que se ajustem por prioridade, para calibrar de forma mais fina o trade-off entre os diferentes níveis de criticidade das chamadas.
 
 3.  **Análise de Robustez e Transferibilidade:** Avaliar o desempenho do modelo em diferentes cenários de demanda (e.g., eventos especiais, crises) e testar a transferibilidade das políticas aprendidas para outras cidades ou contextos operacionais.
+
+---
+
+# Obrigado! 🙌  
+Perguntas?
