@@ -19,7 +19,7 @@ Moacir Almeida Simões Júnior
 Tobias de Abreu Kuse
 <!-- Instituto de Informática, Universidade Federal do Rio Grande do Sul -->
 
----
+<!-- ---
 
 # Resumo do Projeto
 
@@ -35,7 +35,7 @@ Este trabalho propõe e avalia um modelo de **Aprendizado por Reforço Multiagen
 - **Formulação:** O problema é um **MDP multiagente cooperativo**, onde cada patrulha (agente) aprende uma política de posicionamento.
 - **Recompensa:** Uma função **multiobjetivo** que busca conciliar metas conflitantes (tempo de resposta, cobertura de hotspots, etc.).
 - **Principal Achado:** O MARL supera o patrulhamento aleatório e se aproxima de heurísticas especializadas, com destaque para ocorrências de prioridade intermediária.
-
+ -->
 ---
 
 # O Problema e os Objetivos
@@ -64,7 +64,7 @@ section {
 }
 </style>
 
-![bg right:40%](images/fig1.png)
+![bg right:40% contain](images/fig1.png)
 
 ## Ambiente de Simulação
 - Baseado em **dados reais** do 9º Batalhão de Polícia Militar (Porto Alegre/RS).
@@ -151,7 +151,7 @@ A **função de transição ($P$)** são as "regras da física" do ambiente.
 
 ---
 
-# Formulação MARL: Recompensa e Treinamento
+# Formulação MARL: Recompensa (R)
 
 <style scoped>
 section {
@@ -159,14 +159,56 @@ section {
 }
 </style>
 
-## Recompensa (R)
 A recompensa é **global e compartilhada** para incentivar a cooperação.
 $r_t = \alpha \cdot \Delta \text{atendidos}_t - \lambda_{\text{idle}} \cdot \widetilde{\Delta \text{idle}_t} - \lambda_{\text{resp}} \cdot \widetilde{\Delta \text{resp}_t} - \lambda_{\text{back}} \cdot \widetilde{\Delta \text{backlog}_t}$
-- A fórmula balanceia o incentivo por atender chamadas com a penalidade por ociosidade, tempo de resposta e chamadas em fila.
 
-## Treinamento da Rede Neural
-- **Entrada:** O vetor de **observação $o_i$** (19 valores).
-- **Saída:** Um **vetor de Q-values**, um para cada ação (vértice) possível. A ação com o maior Q-value é a escolhida.
+- **Componentes da Recompensa:**
+    - **$\Delta \text{atendidos}_t$ (Positivo):** Recompensa por chamados atendidos no minuto, ponderado pela prioridade. Incentiva a **eficiência**.
+    - **$\widetilde{\Delta \text{idle}_t}$ (Negativo):** Penaliza o aumento da ociosidade acumulada nos hotspots. Incentiva a **prevenção**.
+    - **$\widetilde{\Delta \text{resp}_t}$ (Negativo):** Penaliza o aumento do tempo de resposta acumulado (ponderado por prioridade). Incentiva a **agilidade**.
+    - **$\widetilde{\Delta \text{backlog}_t}$ (Negativo):** Penaliza o aumento de chamadas esperando na fila. Incentiva a **capacidade do sistema**.
+<!-- - Os hiperparâmetros $\alpha$ e $\lambda$s controlam o *trade-off* entre esses objetivos. -->
+
+\* Os termos com til ($\widetilde{\cdot}$) representam versões normalizadas dos deltas.
+
+---
+
+# Metodologia: Arquitetura da Rede (Dueling DQN)
+
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
+![bg right:40% contain](images/fig7.png)
+
+A função de valor $Q(o, u)$ de cada agente é aproximada por uma rede neural (MLP) com a arquitetura **Dueling DQN**.
+
+Esta arquitetura possui dois "fluxos" separados:
+1.  **Fluxo do Valor:** Estima o quão bom é o estado atual - $V(s)$.
+2.  **Fluxo da Vantagem:** Estima a vantagem de cada ação naquele estado - $A(s, a)$.
+
+Os dois ramos são combinados para gerar os Q-values finais, o que estabiliza o aprendizado:
+$Q(s, a) = V(s) + (A(s, a) - \text{mean}(A(s, a)))$
+
+<!-- ---
+
+# Metodologia: Processo de Treinamento
+
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
+O treinamento utiliza técnicas padrão de Deep RL para estabilidade e eficiência:
+
+- **Experience Replay:** As transições $(s, a, r, s')$ são armazenadas em um *replay buffer*. O treinamento é feito em lotes amostrados aleatoriamente deste buffer para quebrar a correlação entre as amostras.
+
+- **Rede-Alvo (Target Network):** Uma segunda rede, com pesos "congelados", é usada para calcular o valor do estado futuro. Seus pesos são atualizados com menos frequência para evitar instabilidade no cálculo da perda (loss).
+
+- **Política $\epsilon$-Greedy:** Para balancear exploração e explotação, o agente escolhe uma ação aleatória com probabilidade $\epsilon$, que decai ao longo do treinamento. -->
 
 ---
 
@@ -298,3 +340,4 @@ section {
 
 # Obrigado! 🙌  
 Perguntas?
+
