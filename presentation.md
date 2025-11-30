@@ -127,7 +127,7 @@ Os **agentes** no modelo são as próprias **patrulhas policiais**.
 - Cada patrulha opera como um agente de decisão independente.
 - O objetivo é aprender uma política que contribua para o bem comum do sistema.
 
-## Estado (S) vs. Observação (oi)
+## Estado (S) vs. Observação ($o_i$)
 - **Estado Global ($\mathcal{S}$):** A "verdade absoluta" do simulador (todas as patrulhas, chamadas, etc.).
 - **Observação Local ($o_i$):** A visão **parcial** que cada agente `i` tem do mundo (o vetor de 19 dimensões), que é a entrada para sua rede neural.
 
@@ -298,5 +298,3 @@ section {
 
 # Obrigado! 🙌  
 Perguntas?
-
----
