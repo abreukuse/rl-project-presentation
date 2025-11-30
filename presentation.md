@@ -6,14 +6,13 @@ paginate: true
 
 # Abordagem Multiagente na combinação de ações de patrulhamento preventivo e de atendimento de chamadas policiais
 
-<!-- <style>
-img[alt~="right"] {
-  display: block;
-  margin: 0 auto;
+<style scoped>
+section {
+  font-size: 25px;
 }
 </style>
 
-![w:500 right](images/fig2.png) -->
+<!-- ![w:500 right](images/fig2.png) -->
 ![bg right:40%](images/fig5.png)
 
 Moacir Almeida Simões Júnior
@@ -94,15 +93,15 @@ section {
 - **Eventos Aleatórios:** A chegada de chamadas é modelada por uma **distribuição de Poisson** (para os intervalos entre chamadas). O tempo de atendimento de cada ocorrência é sorteado de uma **distribuição exponencial**.
 
 
----
+<!-- ---
 
 # Metodologia: Dinâmica da Simulação
 
 <style>
-section {
+/*section {
   font-size: 25px;
 }
-img[alt~="center"] {
+*/img[alt~="center"] {
   position: absolute;
   top: 55%;  /* Ponto central vertical (55% para dar espaço ao título) */
   left: 50%; /* Ponto central horizontal */
@@ -117,11 +116,11 @@ img[alt~="center"] {
 </style>
 
 ![center](images/fig3.png)
-
+ -->
 
 ---
 
-# Metodologia: Formulação do Modelo
+# Metodologia: Formulação MARL
 
 <style scoped>
 section {
@@ -129,19 +128,16 @@ section {
 }
 </style>
 
-O problema é formulado como um **Processo de Decisão de Markov (MDP) multiagente e cooperativo**, definido pela tupla:
+O problema é formulado como um **Processo de Decisão de Markov (MDP) multiagente e cooperativo**.
+
+A estrutura é definida pela tupla:
 $\mathcal{M} = \langle \mathcal{A}, \mathcal{S}, \mathcal{U}, P, R, \gamma \rangle$
 
-- **Agentes ($\mathcal{A}$):** As próprias patrulhas policiais.
-- **Estado ($\mathcal{S}$):** Uma representação do ambiente (posições, filas, etc.).
-- **Ações ($\mathcal{U}$):** O conjunto de vértices de patrulhamento que um agente pode escolher.
-- **Transição ($P$):** A dinâmica do simulador, que atualiza o estado a cada minuto.
-- **Recompensa ($R$):** Uma recompensa global compartilhada entre todos os agentes.
-- **Fator de Desconto ($\gamma$):** Parâmetro que pondera a importância de recompensas futuras.
+Nos próximos slides, cada um desses componentes será detalhado.
 
 ---
 
-# Metodologia: Aprendizado do Agente
+# Formulação MARL: Agentes (A)
 
 <style scoped>
 section {
@@ -149,18 +145,14 @@ section {
 }
 </style>
 
-O objetivo é aprender uma política $\pi(u_i|o_i)$ que mapeia a observação local de um agente para a melhor ação de patrulhamento.
+Os **agentes** no modelo são as próprias **patrulhas policiais**.
 
-- **Algoritmo:** **Dueling Deep Q-Network (Dueling DQN)**.
-- **Função Q:** É aproximada por uma rede neural (MLP).
-- **Arquitetura Dueling:** A rede neural tem dois ramos separados:
-    1.  Um para estimar o **valor do estado** ($V(s)$).
-    2.  Outro para estimar a **vantagem de cada ação** ($A(s,a)$).
-- **Estabilização:** O treinamento utiliza um *replay buffer* e uma *rede-alvo* (target network) para estabilizar o aprendizado.
+- Cada patrulha opera como um agente de decisão independente.
+- O objetivo de cada agente é aprender uma política de movimentação que contribua para o bem comum do sistema (maximizar a recompensa global).
 
 ---
 
-# Metodologia: A Observação do Agente ($o_i$)
+# Formulação MARL: Estado (S) vs. Observação (oi)
 
 <style scoped>
 section {
@@ -168,23 +160,49 @@ section {
 }
 </style>
 
-Cada agente recebe um vetor de 19 dimensões com informações locais e globais:
+É crucial distinguir o Estado Global da Observação Local de cada agente:
 
-- **Informações Temporais:**
-  - Codificação cíclica do horário do dia e do dia da semana.
-- **Estado do Sistema (Global):**
-  - Número de chamadas em fila por prioridade (`q1, q2, q3`).
-  - Médias normalizadas de ociosidade, tempo em fila e deslocamento.
-- **Estado do Agente (Local):**
-  - Posição (vértice) atual do agente.
-  - Companhia e tipo da patrulha (One-Hot Encoded).
-- **Informações de Risco (Dinâmicas):**
-  - Risco do hexágono onde o agente está.
-  - Risco do *hotspot* mais perigoso na sua área de atuação.
+- **Estado Global ($\mathcal{S}$):** É a "verdade absoluta" do simulador. Contém a informação de **todas** as patrulhas, **todas** as chamadas na fila, o risco de todos os hotspots, etc.
+
+- **Observação Local ($o_i$):** É a visão **parcial** que cada agente `i` tem do mundo. Nenhum agente vê tudo. Esta observação é o **vetor de 19 dimensões** que serve de entrada para a sua rede neural.
 
 ---
 
-# Metodologia: A Função de Recompensa ($r_t$)
+# Formulação MARL: Ações (U)
+
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
+O **espaço de ações ($\mathcal{U}$)** define o que um agente pode fazer.
+
+- O espaço de ações é **discreto**.
+- Uma "ação" ($u_i$) consiste na escolha de um **vértice de destino** para patrulhamento.
+- Os destinos possíveis são todos os vértices do grafo, que incluem os **pontos de referência dos hotspots** e os **quartéis (depósitos)**.
+
+---
+
+# Formulação MARL: Transição (P)
+
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
+A **função de transição ($P$)** representa as "regras da física" do ambiente.
+
+- No modelo, a transição **é a própria dinâmica do simulador**, explicada anteriormente.
+- A cada minuto, o simulador:
+    1. Processa as ações escolhidas pelos agentes (inicia deslocamentos).
+    2. Introduz eventos estocásticos (novas chamadas que chegam da tabela de eventos $\mathcal{E}$).
+    3. Atualiza o estado de todas as entidades.
+
+---
+
+# Formulação MARL: Recompensa (R)
 
 <style scoped>
 section {
@@ -197,12 +215,28 @@ A recompensa é **global e compartilhada**, refletindo o desempenho do sistema c
 $r_t = \alpha \cdot \Delta \text{atendidos}_t - \lambda_{\text{idle}} \cdot \widetilde{\Delta \text{idle}_t} - \lambda_{\text{resp}} \cdot \widetilde{\Delta \text{resp}_t} - \lambda_{\text{back}} \cdot \widetilde{\Delta \text{backlog}_t}$
 
 - **Componentes:**
-    - **$\Delta \text{atendidos}$ (Positivo):** Incentiva o atendimento de chamadas (com peso por prioridade).
-    - **$\widetilde{\Delta \text{idle}}$ (Negativo):** Penaliza o tempo que os *hotspots* ficam sem cobertura.
+    - **$\Delta \text{atendidos}$ (Positivo):** Incentiva o atendimento de chamadas.
+    - **$\widetilde{\Delta \text{idle}}$ (Negativo):** Penaliza a ociosidade dos *hotspots*.
     - **$\widetilde{\Delta \text{resp}}$ (Negativo):** Penaliza o tempo de resposta às chamadas.
-    - **$\widetilde{\Delta \text{backlog}}$ (Negativo):** Penaliza o número de chamadas esperando na fila.
+    - **$\widetilde{\Delta \text{backlog}}$ (Negativo):** Penaliza o número de chamadas em fila.
 
-Os hiperparâmetros $\alpha$ e $\lambda$s controlam o *trade-off* entre os objetivos.
+---
+
+# Metodologia: Treinamento da Rede Neural
+
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
+O aprendizado ocorre através de uma rede neural (Dueling DQN) para cada agente.
+
+- **Entrada da Rede:** O vetor de **observação $o_i$** (19 valores) que descreve o que o agente `i` sabe sobre o ambiente.
+
+- **Saída da Rede:** Um **vetor de Q-values**. Cada neurônio de saída corresponde ao valor esperado de se mover para um dos vértices possíveis.
+
+A ação com o maior Q-value é a escolhida (seguindo a política $\epsilon$-greedy durante o treinamento).
 
 ---
 
@@ -257,6 +291,12 @@ section {
 
 # Resultados: Análise por Prioridade de Fila
 
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
 <!-- ## Tempo Médio na Fila de Espera (em minutos) -->
 | Prioridade | ALEATÓRIO | BAPS    | MARL_8 |
 | :--- | :--- | :--- | :--- |
@@ -273,6 +313,12 @@ section {
 
 # Resultados: O Achado Principal (Prioridade 2)
 
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
+
 O modelo **MARL_8** apresentou um desempenho **superior** ao da heurística BAPS para chamadas de prioridade intermediária.
 
 - **Fila Média (Prioridade 2):**
@@ -285,6 +331,12 @@ O agente MARL aprendeu uma política de patrulhamento mais sofisticada. Ele pare
 ---
 
 # Conclusão
+
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
 
 ## Principais Conclusões
 - A heurística **BAPS** se mostrou mais eficiente no agregado, mas o **MARL** é altamente competitivo.
@@ -299,6 +351,12 @@ O agente MARL aprendeu uma política de patrulhamento mais sofisticada. Ele pare
 ---
 
 # Trabalhos Futuros
+
+<style scoped>
+section {
+  font-size: 25px;
+}
+</style>
 
 1.  **Estender o MARL para o Despacho:** Modelar o despachante também como um agente de RL, permitindo o aprendizado de políticas de despacho dinâmicas, em vez de usar regras fixas.
 
