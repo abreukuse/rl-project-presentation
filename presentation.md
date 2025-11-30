@@ -253,9 +253,10 @@ section {
 | MARL_8    | 4645.42     | 34.47 | 7.25            | 41.71             |
 
 ## Análise
-- A heurística **BAPS** apresentou o melhor desempenho global.
+<!-- - A heurística **BAPS** apresentou o melhor desempenho global. -->
+- A heurística **BAPS** (guiada por risco) se confirmou como a mais eficiente no geral, alcançando os menores tempos de resposta, fila e ociosidade.
 - O modelo **MARL_8** superou significativamente a baseline **ALEATÓRIA** em todas as métricas.
-- O resultado do MARL é promissor, pois se aproxima de uma heurística forte, validando que o agente aprendeu uma política coerente.
+- O resultado do **MARL** é promissor, pois se aproxima de uma heurística forte, validando que o agente aprendeu uma política coerente.
 
 <div class="footnote">* Valores médios de 3 execuções de simulação independentes.</div>
 
@@ -298,7 +299,7 @@ O modelo **MARL_8** apresentou um desempenho **superior** ao da heurística BAPS
     - **BAPS:** 25.73 min
 
 ## Hipótese
-O agente MARL aprendeu uma política de patrulhamento mais sofisticada. Ele parece ter identificado um padrão de posicionamento que equilibra melhor a cobertura de zonas de alto risco com a necessidade de estar próximo a áreas de demanda moderada, algo que a heurística, com suas regras mais rígidas, não captura explicitamente.
+A abordagem **MARL** aprendeu uma política de patrulhamento mais sofisticada. Ela parece ter identificado um padrão de posicionamento que equilibra melhor a cobertura de zonas de alto risco com a necessidade de estar próximo a áreas de demanda moderada, algo que a heurística, com suas regras mais rígidas, não captura explicitamente.
 
 ---
 
