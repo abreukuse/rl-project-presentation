@@ -91,6 +91,7 @@ section {
 - **Entidade Patrulha:** Evolui por estados (Disponível, Deslocamento, Atendimento, etc.).
 - **Lógica do Despachante:** Regras fixas (mais próximo para P1, da própria área para P2/P3).
 - **O MARL atua** quando a patrulha está no estado `DISPONÍVEL`, decidindo para onde ir.
+- **Eventos Aleatórios:** A chegada de chamadas é modelada por uma **distribuição de Poisson** (para os intervalos entre chamadas). O tempo de atendimento de cada ocorrência é sorteado de uma **distribuição exponencial**.
 
 
 ---
