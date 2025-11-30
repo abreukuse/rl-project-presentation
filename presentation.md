@@ -1,3 +1,9 @@
+---
+marp: true
+theme: gaia
+paginate: true
+---
+
 # Abordagem Multiagente na combinação de ações de patrulhamento preventivo e de atendimento de chamadas policiais
 
 **Autores:** Moacir Almeida Simões Júnior, Tobias de Abreu Kuse
@@ -5,198 +11,178 @@
 
 ---
 
-# Introdução
+# Resumo do Projeto
 
-## O Problema do Patrulhamento Policial
-- **Prevenção:** Patrulhamento para inibir crimes.
-- **Resposta:** Atendimento imediato a chamadas.
-- **Limitações:** Alocação de recursos frequentemente *ad hoc*, abordagens separadas.
+Este trabalho propõe e avalia um modelo de **Aprendizado por Reforço Multiagente (MARL)** para o patrulhamento policial urbano.
 
-## Desafios
-- Incerteza (chegadas aleatórias de chamadas)
-- Dinâmica do ambiente (risco variável no tempo e espaço)
-- Decisões sequenciais (onde patrulhar, qual viatura despachar)
-
-## Nossa Proposta
-- **Aprendizado por Reforço Multiagente (MARL)**
-- Cada patrulha é um agente que aprende a escolher o próximo vértice a patrulhar.
-- Despachante segue regras operacionais para envio de patrulhas.
+- **Método:** Integramos uma arquitetura **Dueling DQN** a um **simulador de eventos discretos** que reproduz a operação policial minuto a minuto.
+- **Formulação:** O problema é um **MDP multiagente cooperativo**, onde cada patrulha (agente) aprende uma política de posicionamento.
+- **Recompensa:** Uma função **multiobjetivo** que busca conciliar metas conflitantes (tempo de resposta, cobertura de hotspots, etc.).
+- **Principal Achado:** O MARL supera o patrulhamento aleatório e se aproxima de heurísticas especializadas, com destaque para ocorrências de prioridade intermediária.
 
 ---
 
-# Objetivos
+# O Problema e os Objetivos
 
-## Dois Objetivos Principais
-1.  **Minimizar o tempo de resposta** da patrulha policial a chamadas de emergência.
-2.  **Maximizar a cobertura/permanência** em áreas altamente afetadas pela criminalidade (*hotspots*).
+## O Desafio Central
+Equilibrar dois objetivos conflitantes da atividade policial:
+1.  **Patrulhamento Preventivo:** Maximizar a presença policial em áreas de alto risco (*hotspots*) para inibir crimes.
+2.  **Atendimento Reativo:** Minimizar o tempo de resposta a chamadas de emergência.
 
-## Otimização Simultânea com MARL
-- Aprendizado por **TD Learning** com **Experience Replay** e **Deep Q-Learning**.
-- Geração de uma política conjunta que tenta otimizar ambos os objetivos.
-
----
-
-# Revisão da Literatura: Patrulhamento
-
-## Patrulhamento Preventivo de Hotspots
-- O crime se concentra em locais específicos (*hotspots*).
-- Foco em *hotspots* é eficiente para redução do crime.
-- **Teoria das Atividades Rotineiras:** Convergência de criminosos, alvos e ausência de guardiões.
-- Algoritmos preditivos para identificar futuros eventos criminais.
-
-## Patrulhamento de Resposta a Chamadas
-- Despacho de patrulhas: complexidade na alocação dinâmica de recursos.
-- 40-60% do tempo de patrulha dedicado a chamados.
-- Resposta rápida: aumenta chances de prisão e coleta de provas.
-- Sistema de patrulhas como um sistema de filas multi-servidor.
-- Sistemas de prioridade: reduzem espera para alta prioridade, aumentam para baixa.
-
----
-
-# Revisão da Literatura: Aprendizado por Reforço
-
-## RL/MARL como Solução
-- Abordagens tradicionais tratam prevenção e resposta de forma fragmentada.
-- RL/MARL: alternativa promissora para tratamento conjunto.
-- Capacidade de aprender políticas ótimas em ambientes dinâmicos, estocásticos e multi-objetivo.
-
-## Trabalhos Relacionados
-- **Joe et al. (2022):** DRL para despacho policial, equilibrando resposta e presença preventiva.
-- **Repasky et al. (2024):** MARL distribuído para integração de patrulhamento e despacho.
-- **Palma et al. (2025):** POMDP descentralizado para patrulhamento urbano sob observabilidade parcial.
-- **Chen et al. (2013):** Abordagem puramente preventiva baseada em MDP, métrica SLF.
+## A Nossa Proposta
+Um **sistema multiagente (MARL)** onde as patrulhas são agentes autônomos que aprendem uma **política de patrulhamento** para otimizar ambos os objetivos simultaneamente.
 
 ---
 
 # Metodologia: Visão Geral
 
-## Validação
-- Modelo validado com dados reais de uma unidade policial urbana (Porto Alegre).
+![bg right:40%](images/fig1.png)
 
-## Estrutura Espacial
-- Área dividida em **grades hexagonais** (250m de lado).
-- Representada como um **grafo indireto**.
-- Rotas e custos de deslocamento calculados via **Bing Maps API**.
+## Ambiente de Simulação
+- Baseado em **dados reais** do 9º Batalhão de Polícia Militar (Porto Alegre/RS).
+- Utiliza um **grid hexagonal** para representar o espaço geográfico.
 
 ## Identificação de Hotspots
-- Modelo preditivo (XGBoost) para classificar *hotspots* com base no risco de ocorrência de eventos criminais.
-- Variáveis: estruturas urbanas, temporais, crimes acumulados, dados climáticos.
-- Valor de probabilidade ($W_i$) atribuído a cada *hotspot* para as próximas duas horas.
+- Um modelo preditivo **(XGBoost)**, treinado com dados históricos, classifica os hexágonos com base no **risco de ocorrência** de eventos para as próximas 2 horas.
 
 ---
 
-# Metodologia: Estratégias Comparadas
+# Metodologia: Dinâmica da Simulação
 
-## Para Avaliar o Método Proposto
-1.  **Otimização por Colônia de Formigas (ACO):** Patrulhas empregadas nos pontos de maior risco com paradas determinadas.
-2.  **Aleatório:** Patrulhamento randômico com paradas variáveis (1 a 15 minutos) nos *hotspots*.
-3.  **MARL (Nossa Proposta):** Aprendizado por Reforço Multiagente.
-
----
-
-# Metodologia: Modelo MARL Proposto
-
-## Formulação
-- Problema formulado como um **Markov Decision Process (MDP) multiagente cooperativo**.
-- $\mathcal{M} = \langle \mathcal{A}, \mathcal{S}, \mathcal{U}, P, R, \gamma \rangle$
-
-## Observação Local ($o_i$)
-- Cada agente observa uma projeção local do estado global (vetor de 19 dimensões).
-- Inclui: tempo, dia, filas de chamadas, ociosidade média, deslocamento médio, companhia, tipo de patrulha, posição, risco atual e risco top da companhia.
+![bg right:45%](images/QUADRO-ESTADOS-PT%20(1).png)
 
 ## Simulação de Eventos Discretos
-- Interage com a simulação em passos de $\Delta t = 1$ minuto.
-- Etapas: definição de destino, inserção de incidentes em fila, despacho, atualização de estados das patrulhas.
-
-## Função de Recompensa Global Compartilhada ($r_t$)
-- Baseada em variações (deltas) de métricas agregadas:
-    - Ociosidade acumulada nos *hotspots* ($\Delta \text{idle}_t$)
-    - Tempo de resposta acumulado ($\Delta \text{resp}_t$)
-    - Medida ponderada de chamadas em fila ($\Delta \text{backlog}_t$)
-    - Número de chamados atendidos ($\Delta \text{atendidos}_t$)
+- Desenvolvida em Python (`simpy`), modela a operação minuto a minuto.
+- **Entidade Patrulha:** Evolui por estados (Disponível, Deslocamento, Atendimento, etc.).
+- **Lógica do Despachante:** Regras fixas (mais próximo para P1, da própria área para P2/P3).
+- **O MARL atua** quando a patrulha está no estado `DISPONÍVEL`, decidindo para onde ir.
 
 ---
 
-# Metodologia: Métricas de Desempenho
+# Metodologia: Modelo MARL
 
-## Ociosidade de Hotspots ($\overline{I_{i}}(t)$)
-- Tempo durante o qual um *hotspot* permanece descoberto (sem patrulhas).
-- Indicador de presença preventiva.
+## Formulação
+- **MDP Cooperativo Multiagente:** $\mathcal{M} = \langle \mathcal{A}, \mathcal{S}, \mathcal{U}, P, R, \gamma \rangle$
+- **Agentes ($\mathcal{A}$):** As próprias patrulhas policiais.
+- **Espaço de Ação ($\mathcal{U}$):** O conjunto de *hotspots* (vértices do grafo) para onde o agente pode escolher se deslocar.
 
-## Tempo de Resposta
-- Intervalo entre o registro de um incidente e a chegada da equipe policial.
-- Indicador-chave de eficiência na resposta a emergências.
+## Aprendizado
+- Cada agente aprende uma política $\pi(u_i|o_i)$ que mapeia sua observação local para uma ação.
+- O objetivo é maximizar uma **recompensa global compartilhada**, incentivando a cooperação.
+- Utilizamos o algoritmo **Dueling Deep Q-Network (Dueling DQN)**.
+
+---
+
+# Metodologia: A Observação do Agente ($o_i$)
+
+Cada agente recebe um vetor de 19 dimensões com informações locais e globais, agrupadas em:
+
+- **Informações Temporais:**
+  - Codificação cíclica do horário do dia e do dia da semana.
+- **Estado do Sistema (Global):**
+  - Número de chamadas em fila por prioridade (`q1, q2, q3`).
+  - Médias normalizadas de ociosidade, tempo em fila e deslocamento.
+- **Estado do Agente (Local):**
+  - Posição (vértice) atual do agente.
+  - Companhia e tipo da patrulha (One-Hot Encoded).
+- **Informações de Risco (Dinâmicas):**
+  - Risco do hexágono onde o agente está.
+  - Risco do *hotspot* mais perigoso na sua área de atuação.
+
+---
+
+# Metodologia: A Função de Recompensa ($r_t$)
+
+A recompensa é **global e compartilhada**, refletindo o desempenho do sistema como um todo.
+
+$r_t = \alpha \cdot \Delta \text{atendidos}_t - \lambda_{\text{idle}} \cdot \widetilde{\Delta \text{idle}_t} - \lambda_{\text{resp}} \cdot \widetilde{\Delta \text{resp}_t} - \lambda_{\text{back}} \cdot \widetilde{\Delta \text{backlog}_t}$
+
+- **Componentes:**
+    - **$\Delta \text{atendidos}$ (Positivo):** Incentiva o atendimento de chamadas (com peso por prioridade).
+    - **$\widetilde{\Delta \text{idle}}$ (Negativo):** Penaliza o tempo que os *hotspots* ficam sem cobertura.
+    - **$\widetilde{\Delta \text{resp}}$ (Negativo):** Penaliza o tempo de resposta às chamadas.
+    - **$\widetilde{\Delta \text{backlog}}$ (Negativo):** Penaliza o número de chamadas esperando na fila.
+
+Os hiperparâmetros $\alpha$ e $\lambda$s controlam o *trade-off* entre os objetivos.
 
 ---
 
 # Validação: Setup Experimental
 
-## Dados
-- Caso real: 9º Batalhão de Polícia Militar, Porto Alegre.
-- Período: 2015-2021 (428.214 eventos policiais).
-- Grid hexagonal: 250m de lado, 474 grades (157 com registros criminais).
-- Dados de estruturas urbanas (Open Street Maps) e climáticos (INMET).
+## Estratégias Comparadas
+1.  **MARL_8:** A melhor configuração encontrada do nosso modelo após vários experimentos.
+2.  **BAPS:** Uma heurística forte (baseada em Otimização por Colônia de Formigas) usada como baseline de alto desempenho.
+3.  **ALEATÓRIO:** Uma baseline simples onde as patrulhas escolhem destinos aleatoriamente.
 
-## Predição de Hotspots
-- **XGBoost** para análise preditiva das ocorrências.
-- Dados de treinamento e teste (80/20).
-
-## Parâmetros de Simulação
-- Duração do turno de patrulha, tempo de permanência em *hotspots*.
-- Variáveis aleatórias: alocação de chamada (Poisson), intervalo entre chamadas (Poisson), prioridade, tempo de atendimento (Exponencial).
-- Parâmetros ACO: $\alpha=0, \beta=1, \theta=3$.
-
-## Modelo MARL
-- Função $Q(o_i, u_i; \theta)$ aproximada por **Dueling DQN** (MLP).
-- Hiperparâmetros otimizados (gamma, lr, batch_size, buffer_size, eps_decay, etc.).
+## Condições de Avaliação
+- Foram realizadas 3 execuções de simulação com horizonte de 7 dias.
+- Para garantir uma comparação justa, **todas as estratégias foram avaliadas sob o mesmo conjunto de chamadas geradas**.
 
 ---
 
 # Resultados: Comparação Geral
 
-## Métricas de Desempenho (Tabela 4)
+## Métricas de Desempenho (Médias de 3 Execuções)
 | Método    | Ociosidade Média | Fila Média | Deslocamento Médio | Tempo Resposta Médio |
 | :-------- | :--------------- | :--------- | :----------------- | :------------------- |
-| ALEATORIO | 5104.40          | 43.33      | 7.06               | 50.39                |
-| BAPS      | 4477.52          | 25.53      | 6.93               | 32.47                |
-| MARL      | 4895.88          | 35.90      | 7.00               | 41.05                |
+| ALEATÓRIO | 4843.14          | 39.52      | 7.03               | 46.54                |
+| BAPS      | 4516.59          | 27.93      | 7.10               | 35.03                |
+| **MARL_8**| **4645.42**      | **34.47**  | **7.25**           | **41.71**            |
 
-## Discussão
-- **BAPS (ACO):** Menor ociosidade média, bom tempo de resposta.
-- **MARL:** Desempenho competitivo, equilibrando os objetivos.
-- **Aleatório:** Pior desempenho geral.
+## Análise
+- A heurística **BAPS** apresentou o melhor desempenho global.
+- O modelo **MARL_8** superou significativamente a baseline **ALEATÓRIA** em todas as métricas.
+- O resultado do MARL é promissor, pois se aproxima de uma heurística forte, validando que o agente aprendeu uma política coerente.
 
 ---
 
-# Resultados: Filas por Prioridade
+# Resultados: Análise por Prioridade de Fila
 
-## Tempo Médio na Fila de Espera (Tabela 6)
-| Métrica                       | Cobertura Gulosa | p-Medianas | ACO      | Aleatório |
-| :---------------------------- | :--------------- | :--------- | :------- | :-------- |
-| Média Fila -- Prioridade 1 (min) | 2,73             | 2,77       | 3,91     | 2,46      |
-| Média Fila -- Prioridade 2 (min) | 49,28            | 58,00      | 54,17    | 63,15     |
-| Média Fila -- Prioridade 3 (min) | 168,65           | 238,96     | 173,25   | 216,18    |
+## Tempo Médio na Fila de Espera (em minutos)
+| Prioridade | ALEATÓRIO | BAPS    | **MARL_8** |
+| :--- | :--- | :--- | :--- |
+| **Prioridade 1 (Crítica)** | 5.04 | 0.00 | **0.06** |
+| **Prioridade 2 (Interm.)** | 49.82 | 25.73 | **15.22** |
+| **Prioridade 3 (Baixa)** | 48.07 | 28.82 | **40.82** |
 
-## Discussão
-- **Prioridade 1:** Aleatório e Cobertura Gulosa com melhores tempos.
-- **Prioridade 2:** Cobertura Gulosa com menor tempo.
-- **Prioridade 3:** Cobertura Gulosa e ACO com melhores tempos.
-- **Cobertura Gulosa:** Mais equilibrada entre os níveis de prioridade.
-- **p-Medianas:** Favorece chamadas críticas, mas pior para menos urgentes.
+## Análise
+- **P1:** BAPS e MARL_8 são quase ótimos, zerando a fila para chamadas críticas.
+- **P3:** BAPS é melhor. O MARL sacrifica o desempenho em baixa prioridade para otimizar as demais, um comportamento esperado e ajustável.
+- **P2:** O resultado mais interessante...
+
+---
+
+# Resultados: O Achado Principal (Prioridade 2)
+
+O modelo **MARL_8** apresentou um desempenho **significativamente superior** ao da heurística BAPS para chamadas de prioridade intermediária.
+
+- **Fila Média (Prioridade 2):**
+    - **MARL_8:** **15.22 min**
+    - **BAPS:** 25.73 min
+
+## Hipótese
+O agente MARL aprendeu uma política de patrulhamento mais sofisticada. Ele parece ter identificado um padrão de posicionamento que equilibra melhor a cobertura de zonas de alto risco com a necessidade de estar próximo a áreas de demanda moderada, algo que a heurística, com suas regras mais rígidas, não captura explicitamente.
 
 ---
 
 # Conclusão
 
-## Principais Achados
-- **Cobertura Gulosa de Hotspots:** Desempenho mais equilibrado entre prioridades.
-- **Otimização por Colônia de Formigas (ACO):** Eficaz na redução da ociosidade dos pontos críticos.
-- **p-Medianas:** Estabilidade e bom desempenho em alta prioridade, mas menor responsividade em chamados menos urgentes.
+## Principais Conclusões
+- A heurística **BAPS** se mostrou mais eficiente no agregado, mas o **MARL** é altamente competitivo.
+- O **MARL se destacou na prioridade 2**, indicando que aprendeu políticas de posicionamento complexas e não óbvias.
+- É possível obter ganhos operacionais relevantes **ajustando apenas o padrão de patrulhamento** (o que o MARL faz), sem alterar as regras de despacho.
 
-## Avanço Principal do Estudo
-- **Integração simultânea** de estratégias de prevenção ao crime (patrulhamento orientado por risco) com a resposta reativa a chamados emergenciais.
+## Contribuições
+- Integração de patrulhamento preventivo e reativo em um único simulador.
+- Formulação do problema como MDP multiagente com recompensa multiobjetivo.
+- Validação empírica com dados reais de uma unidade policial brasileira.
 
-## Implicações
-- A combinação entre prevenção e resposta exige modelos dinâmicos e adaptativos.
-- Estratégias que integram coordenação entre patrulhas e atualizações contínuas do risco tendem a oferecer melhores resultados.
-- A abordagem proposta é uma ferramenta promissora para apoio à tomada de decisão estratégica no policiamento urbano.
+---
+
+# Trabalhos Futuros
+
+1.  **Estender o MARL para o Despacho:** Modelar o despachante também como um agente de RL, permitindo o aprendizado de políticas de despacho dinâmicas, em vez de usar regras fixas.
+
+2.  **Funções de Recompensa Adaptativas:** Investigar recompensas que se ajustem por prioridade, para calibrar de forma mais fina o trade-off entre os diferentes níveis de criticidade das chamadas.
+
+3.  **Análise de Robustez e Transferibilidade:** Avaliar o desempenho do modelo em diferentes cenários de demanda (e.g., eventos especiais, crises) e testar a transferibilidade das políticas aprendidas para outras cidades ou contextos operacionais.
