@@ -92,32 +92,6 @@ section {
 - **O MARL atua** quando a patrulha está no estado `DISPONÍVEL`, decidindo para onde ir.
 - **Eventos Aleatórios:** A chegada de chamadas é modelada por uma **distribuição de Poisson** (para os intervalos entre chamadas). O tempo de atendimento de cada ocorrência é sorteado de uma **distribuição exponencial**.
 
-
-<!-- ---
-
-# Metodologia: Dinâmica da Simulação
-
-<style>
-/*section {
-  font-size: 25px;
-}
-*/img[alt~="center"] {
-  position: absolute;
-  top: 55%;  /* Ponto central vertical (55% para dar espaço ao título) */
-  left: 50%; /* Ponto central horizontal */
-  transform: translate(-50%, -50%); /* Puxa a imagem de volta pelo seu próprio centro */
-  
-  /* Limites para evitar corte */
-  max-height: 70%; 
-  max-width: 90%;
-  
-  object-fit: contain; /* Mantém a proporção sem distorcer */
-}
-</style>
-
-![center](images/fig3.png)
- -->
-
 ---
 
 # Metodologia: Formulação MARL
@@ -128,16 +102,19 @@ section {
 }
 </style>
 
-O problema é formulado como um **Processo de Decisão de Markov (MDP) multiagente e cooperativo**.
-
-A estrutura é definida pela tupla:
+O problema é formulado como um **Processo de Decisão de Markov (MDP) multiagente e cooperativo**, definido pela tupla:
 $\mathcal{M} = \langle \mathcal{A}, \mathcal{S}, \mathcal{U}, P, R, \gamma \rangle$
 
-Nos próximos slides, cada um desses componentes será detalhado.
+- **Agentes ($\mathcal{A}$):** As próprias patrulhas policiais.
+- **Estado ($\mathcal{S}$):** Uma representação do ambiente (posições, filas, etc.).
+- **Ações ($\mathcal{U}$):** O conjunto de vértices de patrulhamento que um agente pode escolher.
+- **Transição ($P$):** A dinâmica do simulador, que atualiza o estado a cada minuto.
+- **Recompensa ($R$):** Uma recompensa global compartilhada entre todos os agentes.
+- **Fator de Desconto ($\gamma$):** Parâmetro que pondera a importância de recompensas futuras.
 
 ---
 
-# Formulação MARL: Agentes (A)
+# Formulação MARL: Agentes e Estados
 
 <style scoped>
 section {
@@ -145,14 +122,18 @@ section {
 }
 </style>
 
+## Agentes (A)
 Os **agentes** no modelo são as próprias **patrulhas policiais**.
-
 - Cada patrulha opera como um agente de decisão independente.
-- O objetivo de cada agente é aprender uma política de movimentação que contribua para o bem comum do sistema (maximizar a recompensa global).
+- O objetivo é aprender uma política que contribua para o bem comum do sistema.
+
+## Estado (S) vs. Observação (oi)
+- **Estado Global ($\mathcal{S}$):** A "verdade absoluta" do simulador (todas as patrulhas, chamadas, etc.).
+- **Observação Local ($o_i$):** A visão **parcial** que cada agente `i` tem do mundo (o vetor de 19 dimensões), que é a entrada para sua rede neural.
 
 ---
 
-# Formulação MARL: Estado (S) vs. Observação (oi)
+# Formulação MARL: Ações e Transições
 
 <style scoped>
 section {
@@ -160,31 +141,17 @@ section {
 }
 </style>
 
-É crucial distinguir o Estado Global da Observação Local de cada agente:
-
-- **Estado Global ($\mathcal{S}$):** É a "verdade absoluta" do simulador. Contém a informação de **todas** as patrulhas, **todas** as chamadas na fila, o risco de todos os hotspots, etc.
-
-- **Observação Local ($o_i$):** É a visão **parcial** que cada agente `i` tem do mundo. Nenhum agente vê tudo. Esta observação é o **vetor de 19 dimensões** que serve de entrada para a sua rede neural.
-
----
-
-# Formulação MARL: Ações (U)
-
-<style scoped>
-section {
-  font-size: 25px;
-}
-</style>
-
+## Ações (U)
 O **espaço de ações ($\mathcal{U}$)** define o que um agente pode fazer.
+- É **discreto**: a ação ($u_i$) é a escolha de um **vértice de destino** para patrulhamento (hotspots ou quartéis).
 
-- O espaço de ações é **discreto**.
-- Uma "ação" ($u_i$) consiste na escolha de um **vértice de destino** para patrulhamento.
-- Os destinos possíveis são todos os vértices do grafo, que incluem os **pontos de referência dos hotspots** e os **quartéis (depósitos)**.
+## Transição (P)
+A **função de transição ($P$)** são as "regras da física" do ambiente.
+- É a própria **dinâmica do simulador**: processa as ações, introduz eventos aleatórios (chamadas) e atualiza o estado do mundo a cada minuto.
 
 ---
 
-# Formulação MARL: Transição (P)
+# Formulação MARL: Recompensa e Treinamento
 
 <style scoped>
 section {
@@ -192,51 +159,14 @@ section {
 }
 </style>
 
-A **função de transição ($P$)** representa as "regras da física" do ambiente.
-
-- No modelo, a transição **é a própria dinâmica do simulador**, explicada anteriormente.
-- A cada minuto, o simulador:
-    1. Processa as ações escolhidas pelos agentes (inicia deslocamentos).
-    2. Introduz eventos estocásticos (novas chamadas que chegam da tabela de eventos $\mathcal{E}$).
-    3. Atualiza o estado de todas as entidades.
-
----
-
-# Formulação MARL: Recompensa (R)
-
-<style scoped>
-section {
-  font-size: 25px;
-}
-</style>
-
-A recompensa é **global e compartilhada**, refletindo o desempenho do sistema como um todo.
-
+## Recompensa (R)
+A recompensa é **global e compartilhada** para incentivar a cooperação.
 $r_t = \alpha \cdot \Delta \text{atendidos}_t - \lambda_{\text{idle}} \cdot \widetilde{\Delta \text{idle}_t} - \lambda_{\text{resp}} \cdot \widetilde{\Delta \text{resp}_t} - \lambda_{\text{back}} \cdot \widetilde{\Delta \text{backlog}_t}$
+- A fórmula balanceia o incentivo por atender chamadas com a penalidade por ociosidade, tempo de resposta e chamadas em fila.
 
-- **Componentes:**
-    - **$\Delta \text{atendidos}$ (Positivo):** Incentiva o atendimento de chamadas.
-    - **$\widetilde{\Delta \text{idle}}$ (Negativo):** Penaliza a ociosidade dos *hotspots*.
-    - **$\widetilde{\Delta \text{resp}}$ (Negativo):** Penaliza o tempo de resposta às chamadas.
-    - **$\widetilde{\Delta \text{backlog}}$ (Negativo):** Penaliza o número de chamadas em fila.
-
----
-
-# Metodologia: Treinamento da Rede Neural
-
-<style scoped>
-section {
-  font-size: 25px;
-}
-</style>
-
-O aprendizado ocorre através de uma rede neural (Dueling DQN) para cada agente.
-
-- **Entrada da Rede:** O vetor de **observação $o_i$** (19 valores) que descreve o que o agente `i` sabe sobre o ambiente.
-
-- **Saída da Rede:** Um **vetor de Q-values**. Cada neurônio de saída corresponde ao valor esperado de se mover para um dos vértices possíveis.
-
-A ação com o maior Q-value é a escolhida (seguindo a política $\epsilon$-greedy durante o treinamento).
+## Treinamento da Rede Neural
+- **Entrada:** O vetor de **observação $o_i$** (19 valores).
+- **Saída:** Um **vetor de Q-values**, um para cada ação (vértice) possível. A ação com o maior Q-value é a escolhida.
 
 ---
 
@@ -368,3 +298,5 @@ section {
 
 # Obrigado! 🙌  
 Perguntas?
+
+---
