@@ -75,22 +75,37 @@ section {
 
 ---
 
-# Metodologia: Dinâmica da Simulação
-
+<!-- # Metodologia: Dinâmica da Simulação -->
+# Dinâmica da Simulação
 <style scoped>
 section {
   font-size: 25px;
 }
+/*h2 {
+  font-size: 32px;
+}*/
 </style>
 
-<!-- ![bg right:45%](images/fig3.png) -->
+![bg right:40% contain](images/fig8.png)
 
-## Simulação de Eventos Discretos
-- Desenvolvida em Python (`simpy`), modela a operação minuto a minuto.
-- **Entidade Patrulha:** Evolui por estados (Disponível, Deslocamento, Atendimento, etc.).
-- **Lógica do Despachante:** Regras fixas (mais próximo para P1, da própria área para P2/P3).
-- **O MARL atua** quando a patrulha está no estado `DISPONÍVEL`, decidindo para onde ir.
-- **Eventos Aleatórios:** A chegada de chamadas é modelada por uma **distribuição de Poisson** (para os intervalos entre chamadas). O tempo de atendimento de cada ocorrência é sorteado de uma **distribuição exponencial**.
+<!-- ## Simulação de Eventos Discretos -->
+
+<!-- O ambiente simula a operação policial com base em eventos estocásticos: -->
+
+### 1. Geração de Chamadas (Estocástico)
+<!-- A chegada de novas ocorrências é modelada por processos aleatórios: -->
+- **Intervalo entre Chamadas:** Segue uma **distribuição de Poisson**.
+- **Duração do Atendimento:** O tempo para resolver uma ocorrência segue uma **distribuição Exponencial**.
+<!-- - **Prioridades:** As chamadas são classificadas em 3 níveis de criticidade. -->
+
+### 2. Despacho e Fila (Regras)
+- **Regras de Despacho:** A alocação de viaturas segue regras operacionais fixas:
+    - **Prioridade 1:** Patrulha mais próxima.
+    - **Prioridade 2 e 3:** Patrulha da própria área (Companhia).
+- **Fila de Espera:** Nenhuma patrulha disponível.
+
+<!-- - **Fila de Espera:** Se nenhuma patrulha estiver disponível, a chamada entra em uma fila FIFO, ordenada por prioridade. -->
+
 
 ---
 
