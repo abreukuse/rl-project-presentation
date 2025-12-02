@@ -117,14 +117,14 @@ section {
 }
 </style>
 
-O problema é formulado como um **Processo de Decisão de Markov (MDP) multiagente e cooperativo**, definido pela tupla:
+O problema é formulado como um **Processo de Decisão de Markov (MDP) multiagente cooperativo**, definido pela tupla:
 $\mathcal{M} = \langle \mathcal{A}, \mathcal{S}, \mathcal{U}, P, R, \gamma \rangle$
 
-- **Agentes ($\mathcal{A}$):** As próprias patrulhas policiais.
-- **Estado ($\mathcal{S}$):** Uma representação do ambiente (posições, filas, etc.).
-- **Ações ($\mathcal{U}$):** O conjunto de vértices de patrulhamento que um agente pode escolher.
-- **Transição ($P$):** A dinâmica do simulador, que atualiza o estado a cada minuto.
-- **Recompensa ($R$):** Uma recompensa global compartilhada entre todos os agentes.
+- **Agentes ($\mathcal{A}$):** O conjunto de agentes (patrulhas).
+- **Estado ($\mathcal{S}$):** O espaço de estados global.
+- **Ações ($\mathcal{U}$):** O conjunto de ações possíveis (seleção de vértices de patrulhamento).
+- **Transição ($P$):** A função de transição estocástica.
+- **Recompensa ($R$):** A função de recompensa compartilhada.
 - **Fator de Desconto ($\gamma$):** Parâmetro que pondera a importância de recompensas futuras.
 
 ---
