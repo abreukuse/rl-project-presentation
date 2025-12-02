@@ -4,7 +4,7 @@ theme: gaia
 paginate: true
 ---
 
-# Abordagem Multiagente na combinação de ações de patrulhamento preventivo e de atendimento de chamadas policiais
+# Abordagem Multiagente na Combinação de Ações de Patrulhamento Preventivo e de Atendimento de Chamadas Policiais
 
 <style scoped>
 section {
@@ -12,30 +12,11 @@ section {
 }
 </style>
 
-<!-- ![w:500 right](images/fig2.png) -->
 ![bg right:40%](images/fig5.png)
 
 Moacir Almeida Simões Júnior
 Tobias de Abreu Kuse
-<!-- Instituto de Informática, Universidade Federal do Rio Grande do Sul -->
 
-<!-- ---
-
-# Resumo do Projeto
-
-<style scoped>
-section {
-  font-size: 25px;
-}
-</style>
-
-Este trabalho propõe e avalia um modelo de **Aprendizado por Reforço Multiagente (MARL)** para o patrulhamento policial urbano.
-
-- **Método:** Foi integrada uma arquitetura **Dueling DQN** a um **simulador de eventos discretos** que reproduz a operação policial minuto a minuto.
-- **Formulação:** O problema é um **MDP multiagente cooperativo**, onde cada patrulha (agente) aprende uma política de posicionamento.
-- **Recompensa:** Uma função **multiobjetivo** que busca conciliar metas conflitantes (tempo de resposta, cobertura de hotspots, etc.).
-- **Principal Achado:** O MARL supera o patrulhamento aleatório e se aproxima de heurísticas especializadas, com destaque para ocorrências de prioridade intermediária.
- -->
 ---
 
 # O Problema e os Objetivos
@@ -56,7 +37,7 @@ Um **sistema multiagente (MARL)** onde as patrulhas são agentes autônomos que 
 
 ---
 
-# Metodologia: Visão Geral
+# Setup do Ambiente
 
 <style scoped>
 section {
@@ -109,7 +90,7 @@ section {
 
 ---
 
-# Metodologia: Formulação MARL
+# Formulação MARL
 
 <style scoped>
 section {
