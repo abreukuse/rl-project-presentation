@@ -129,7 +129,7 @@ $\mathcal{M} = \langle \mathcal{A}, \mathcal{S}, \mathcal{U}, P, R, \gamma \rang
 
 ---
 
-# Formulação MARL: Agentes e Estados
+# Formulação MARL: Os Agentes ($\mathcal{A}$)
 
 <style scoped>
 section {
@@ -137,14 +137,15 @@ section {
 }
 </style>
 
-## Agentes (A)
-Os **agentes** no modelo são as próprias **patrulhas policiais**.
-- Cada patrulha opera como um agente de decisão independente.
-- O objetivo é aprender uma política que contribua para o bem comum do sistema.
+Os **agentes** são as próprias **patrulhas policiais** individuais. Suas principais características são:
 
-## Estado (S) vs. Observação ($o_i$)
-- **Estado Global ($\mathcal{S}$):** A "verdade absoluta" do simulador (todas as patrulhas, chamadas, etc.).
-- **Observação Local ($o_i$):** A visão **parcial** que cada agente `i` tem do mundo (o vetor de 19 dimensões), que é a entrada para sua rede neural.
+- **Autonomia e Descentralização:** Cada patrulha decide para onde patrulhar, usando sua própria rede neural (Dueling DQN) e visão local do ambiente.
+
+- **Cooperação:** Agentes trabalham juntos, incentivados por uma **recompensa global** compartilhada, para beneficiar o sistema como um todo.
+
+- **Política:** O objetivo é encontrar uma **política de movimentação ($\pi$)** ótima. Essa política representa a estratégia ideal para selecionar a sequência de vértices a serem patrulhados.
+
+- **Visão Parcial:** O agente opera com base em uma **observação local ($o_i$)**, um vetor de 19 informações, sem acesso ao estado global completo.
 
 ---
 
