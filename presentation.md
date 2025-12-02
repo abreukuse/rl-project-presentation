@@ -129,7 +129,7 @@ $\mathcal{M} = \langle \mathcal{A}, \mathcal{S}, \mathcal{U}, P, R, \gamma \rang
 
 ---
 
-# Formulação MARL: Os Agentes ($\mathcal{A}$)
+# Os Agentes ($\mathcal{A}$)
 
 <style scoped>
 section {
@@ -170,7 +170,32 @@ O vetor de observação ($o_i$) possui 19 componentes, agrupados em 4 categorias
 
 ---
 
-# Formulação MARL: Recompensa (R)
+# Ações ($\mathcal{U}$) e Transições ($P$)
+
+<style scoped>
+section {
+  font-size: 25px;
+}
+/*h2 {
+  padding-bottom: 15px;
+}*/
+</style>
+
+### Ações
+A **ação ($u_{i,t}$)** é a decisão que um agente $i$ toma no minuto $t$ quando está disponível. A ação é a **escolha de um vértice de destino** para patrulhar. As ações de todos os agentes é o vetor:
+$\mathbf{u}_t = (u_{1,t}, u_{2,t}, \dots, u_{|\mathcal{A}|,t})$
+
+### Transição
+A **função de transição** descreve como o estado evolui, gerando $s_{t+1}$ a partir de:
+1. O estado atual $s_t$ (o **estado global** completo do ambiente).
+2. A ação conjunta dos agentes $\mathbf{u}_t$.
+3. A **tabela de eventos ($\mathcal{E}$)**, com incidentes pré-gerados para um **episódio**.
+
+$s_{t+1} \sim P(\cdot \mid s_t, \mathbf{u}_t, \mathcal{E})$
+
+---
+
+# Recompensa (R)
 
 <style scoped>
 section {
@@ -192,7 +217,7 @@ $r_t = \alpha \cdot \Delta \text{atendidos}_t - \lambda_{\text{idle}} \cdot \wid
 
 ---
 
-# Metodologia: Arquitetura da Rede (Dueling DQN)
+# Arquitetura da Rede (Dueling DQN)
 
 <style scoped>
 section {
@@ -211,23 +236,6 @@ Esta arquitetura possui dois "fluxos" separados:
 Os dois ramos são combinados para gerar os Q-values finais, o que estabiliza o aprendizado:
 $Q(s, a) = V(s) + (A(s, a) - \text{mean}(A(s, a)))$
 
-<!-- ---
-
-# Metodologia: Processo de Treinamento
-
-<style scoped>
-section {
-  font-size: 25px;
-}
-</style>
-
-O treinamento utiliza técnicas padrão de Deep RL para estabilidade e eficiência:
-
-- **Experience Replay:** As transições $(s, a, r, s')$ são armazenadas em um *replay buffer*. O treinamento é feito em lotes amostrados aleatoriamente deste buffer para quebrar a correlação entre as amostras.
-
-- **Rede-Alvo (Target Network):** Uma segunda rede, com pesos "congelados", é usada para calcular o valor do estado futuro. Seus pesos são atualizados com menos frequência para evitar instabilidade no cálculo da perda (loss).
-
-- **Política $\epsilon$-Greedy:** Para balancear exploração e explotação, o agente escolhe uma ação aleatória com probabilidade $\epsilon$, que decai ao longo do treinamento. -->
 
 ---
 
