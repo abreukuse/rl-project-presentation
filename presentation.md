@@ -149,7 +149,8 @@ Os **agentes** são as próprias **patrulhas policiais** individuais. Suas princ
 
 ---
 
-# Formulação MARL: Ações e Transições
+<!-- # Formulação MARL: Estados e Observações -->
+# Estados($\mathcal{S}$) | Observações($o_i$)
 
 <style scoped>
 section {
@@ -157,13 +158,15 @@ section {
 }
 </style>
 
-## Ações (U)
-O **espaço de ações ($\mathcal{U}$)** define o que um agente pode fazer.
-- É **discreto**: a ação ($u_i$) é a escolha de um **vértice de destino** para patrulhamento (hotspots ou quartéis).
+![bg right:40% contain](images/fig9.png)
 
-## Transição (P)
-A **função de transição ($P$)** são as "regras da física" do ambiente.
-- É a própria **dinâmica do simulador**: processa as ações, introduz eventos aleatórios (chamadas) e atualiza o estado do mundo a cada minuto.
+- O **Estado ($\mathcal{S}$)** contém toda a informação do ambiente, mas o agente decide com base apenas na **Observação ($o_i$)**, um subconjunto parcial de dados que entra na rede neural.
+
+O vetor de observação ($o_i$) possui 19 componentes, agrupados em 4 categorias:
+1.  **Informações Temporais:** Hora do dia e dia da semana.
+2.  **Métricas Operacionais:** Desempenho geral do sistema (filas, ociosidade).
+3.  **Dados do Próprio Agente:** Sua localização, tipo e companhia.
+4.  **Informações de Risco:** Nível de risco do local atual e da sua área.
 
 ---
 
