@@ -120,7 +120,7 @@ section {
 
 Os **agentes** são as próprias **patrulhas policiais** individuais. Suas principais características são:
 
-- **Autonomia e Descentralização:** Cada patrulha decide para onde patrulhar, usando sua própria rede neural (Dueling DQN) e visão local do ambiente.
+- **Autonomia e Descentralização:** Cada patrulha decide para onde patrulhar de forma autônoma, com base em sua visão local do ambiente. Todos os agentes utilizam a **mesma arquitetura de rede neural** (Dueling DQN) para tomar suas decisões.
 
 - **Cooperação:** Agentes trabalham juntos, incentivados por uma **recompensa global** compartilhada, para beneficiar o sistema como um todo.
 
@@ -188,10 +188,10 @@ A recompensa é **global e compartilhada** para incentivar a cooperação.
 $r_t = \alpha \cdot \Delta \text{atendidos}_t - \lambda_{\text{idle}} \cdot \widetilde{\Delta \text{idle}_t} - \lambda_{\text{resp}} \cdot \widetilde{\Delta \text{resp}_t} - \lambda_{\text{back}} \cdot \widetilde{\Delta \text{backlog}_t}$
 
 - **Componentes da Recompensa:**
-    - **$\Delta \text{atendidos}_t$ (Positivo):** Recompensa por chamados atendidos no minuto, ponderado pela prioridade. Incentiva a **eficiência**.
-    - **$\widetilde{\Delta \text{idle}_t}$ (Negativo):** Penaliza o aumento da ociosidade acumulada nos hotspots. Incentiva a **prevenção**.
-    - **$\widetilde{\Delta \text{resp}_t}$ (Negativo):** Penaliza o aumento do tempo de resposta acumulado (ponderado por prioridade). Incentiva a **agilidade**.
-    - **$\widetilde{\Delta \text{backlog}_t}$ (Negativo):** Penaliza o aumento de chamadas esperando na fila. Incentiva a **capacidade do sistema**.
+    - **$\Delta \text{atendidos}_t$:** Recompensa por chamados atendidos no minuto, ponderado pela prioridade. Incentiva a **eficiência**.
+    - **$\widetilde{\Delta \text{idle}_t}$:** Penaliza o aumento da ociosidade acumulada nos hotspots. Incentiva a **prevenção**.
+    - **$\widetilde{\Delta \text{resp}_t}$:** Penaliza o aumento do tempo de resposta acumulado (ponderado por prioridade). Incentiva a **agilidade**.
+    - **$\widetilde{\Delta \text{backlog}_t}$:** Penaliza o aumento de chamadas esperando na fila. Incentiva a **capacidade do sistema**.
 <!-- - Os hiperparâmetros $\alpha$ e $\lambda$s controlam o *trade-off* entre esses objetivos. -->
 
 \* Os termos com til ($\widetilde{\cdot}$) representam versões normalizadas dos deltas.
